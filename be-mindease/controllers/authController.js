@@ -76,7 +76,9 @@ exports.updateProfile = async (req, res) => {
     const result = await pool.query(query, values);
     if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' });
     
-    res.json({ message: 'Profile updated successfully', user: result.rows[0] });
+    const updatedUser = result.rows[0];
+    const token = jwt.sign({ id: updatedUser.id, username: updatedUser.username, role: updatedUser.role, profile_picture: updatedUser.profile_picture }, SECRET_KEY, { expiresIn: '24h' });
+    res.json({ message: 'Profile updated successfully', user: updatedUser, token });
   } catch (err) {
     if (err.code === '23505') {
       return res.status(400).json({ error: 'Username or Email already exists' });
